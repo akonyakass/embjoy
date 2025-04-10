@@ -1,4 +1,4 @@
-# 📦 Streamlit App Starter Kit 
+# EmbJoy ML app
 ```
 ⬆️ (Replace above with your app's name)
 ```
