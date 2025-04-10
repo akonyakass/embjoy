@@ -205,8 +205,8 @@ elif selected_option == 'Pregnancy Risk Prediction':
                 st.error(f"An error occurred during prediction: {e}")
 
     with col_clear:
-    if st.button("Clear"):
+        if st.button("Clear"):
         # Reset the input fields in st.session_state if they exist.
-        for key in ["age", "diastolicBP", "BS", "bodyTemp", "heartRate"]:
-            if key in st.session_state:
-                st.session_state[key] = ""
+            for key in ["age", "diastolicBP", "BS", "bodyTemp", "heartRate"]:
+                if key in st.session_state:
+                    st.session_state[key] = ""
