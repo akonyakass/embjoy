@@ -1,128 +1,209 @@
 import os
 import streamlit as st
+import warnings
+import pickle
 
-# Page configuration
-st.set_page_config(page_title="Maternal Mortality: Analysis & Impact", layout="wide")
-st.title("Maternal Mortality: Importance & Impact")
+# --- Page Configuration ---
+st.set_page_config(page_title="Maternal Mortality: Analysis & Prediction", layout="wide")
 
-# --- Introduction & Background ---
-st.markdown("""
-## Understanding Maternal Mortality
+# --- Sidebar Navigation ---
+sidebar_options = ['Maternal Mortality Analysis', 'Pregnancy Risk Prediction']
+selected_option = st.sidebar.radio("Select Section", sidebar_options)
 
-Maternal mortality refers to the death of a woman during pregnancy, childbirth, or within 42 days of delivery due to complications. It is a critical indicator of the quality of healthcare systems, social equity, and socioeconomic development.
+# =============================================
+# Maternal Mortality Analysis Section
+# =============================================
+if selected_option == 'Maternal Mortality Analysis':
+    st.title("Maternal Mortality: Importance & Impact")
 
-### Why Is This Issue Critical?
+    # --- Introduction & Background ---
+    st.markdown("""
+    ## Understanding Maternal Mortality
 
-- **Human Rights and Equity:**  
-  Each maternal death reveals systemic challenges in healthcare access and education.
-  
-- **Economic and Social Impact:**  
-  High maternal mortality disrupts families and burdens communities with long-term economic and social challenges.
-  
-- **Indicator of Healthcare Quality:**  
-  It measures a nation's ability to provide adequate prenatal, delivery, and postnatal care.
-  
-Addressing maternal mortality requires targeted interventions, policy reforms, and an unwavering commitment to improving health services.
-""")
+    Maternal mortality refers to the death of a woman during pregnancy, childbirth, or within 42 days of delivery due to complications.
+    It is a critical indicator of the quality of healthcare systems, social equity, and overall socioeconomic development.
 
-# --- Evidence & Detailed Visual Insights ---
-st.markdown("## Evidence & Detailed Visual Insights")
-st.write("""
-The visualizations below provide detailed insights into maternal mortality trends and disparities. The order is as follows:
-1. **Mortality Analysis Across Continents Over Years**
-2. **Continental Overview**
-3. **Country-Level Analysis**
-4. **HDI Rank of Countries Over Years**
-5. **Maternal Mortality Ratio vs. Human Development Groups**
-6. **Maternal Mortality Ratio Across UNDP Developing Regions**
+    ### Why Is This Issue Critical?
 
-Each visualization is followed by a detailed explanation of its significance.
-""")
+    - **Human Rights and Equity:**  
+      Each maternal death exposes systemic issues in accessing quality healthcare and education.
+      
+    - **Economic and Social Impact:**  
+      High maternal mortality rates disrupt families and burden communities with long-term economic and social challenges.
+      
+    - **Healthcare Quality Indicator:**  
+      It reflects a nation's capacity to provide effective prenatal, delivery, and postnatal care.
 
-def load_image(path):
-    with open(path, "rb") as file:
-        return file.read()
+    Addressing maternal mortality requires targeted interventions, policy reforms, and a strong commitment to enhancing health services.
+    """)
 
-# Ordered list of images and descriptions
-ordered_images = [
-    (
-        "maternal_mortality_ratio_trends.png",
-        """
+    st.markdown("## Evidence & Detailed Visual Insights")
+    st.write("""
+    The visualizations below provide detailed insights into maternal mortality trends and disparities. They are displayed in the following order:
+      
+    1. **Mortality Analysis Across Continents Over Years**  
+    2. **Continental Overview**  
+    3. **Country-Level Analysis**  
+    4. **HDI Rank of Countries Over Years**  
+    5. **Maternal Mortality Ratio vs. Human Development Groups**  
+    6. **Maternal Mortality Ratio Across UNDP Developing Regions**
+      
+    Each visualization is followed by an explanation of its significance.
+    """)
+
+    # --- Helper Function to Load Images ---
+    def load_image(path):
+        with open(path, "rb") as file:
+            return file.read()
+
+    # --- Ordered List of Images with Descriptions ---
+    ordered_images = [
+        (
+            "maternal_mortality_ratio_trends.png",
+            """
 **Mortality Analysis Across Continents Over Years**
 
-This chart shows the maternal mortality ratio trends from 1990 to 2021 across different continents. It highlights regional disparities and indicates where improvements have been made as well as where challenges persist.
-        """
-    ),
-    (
-        "average_maternal_mortality_ratio.png",
-        """
+This visualization presents maternal mortality ratio trends from 1990 to 2021 across various continents. It highlights regional disparities by showing where progress has been made and where significant challenges remain.
+            """
+        ),
+        (
+            "average_maternal_mortality_ratio.png",
+            """
 **Continental Overview**
 
-This graph summarizes average maternal mortality ratios by continent, enabling direct comparisons. It indicates which continents have effectively reduced maternal mortality and which continue to experience higher rates.
-        """
-    ),
-    (
-        "average_maternal_mortality_ratio_country.png",
-        """
+This graph summarizes average maternal mortality ratios for each continent. It allows for a direct comparison to identify regions that have significantly reduced maternal mortality versus those that still face high rates.
+            """
+        ),
+        (
+            "average_maternal_mortality_ratio_country.png",
+            """
 **Country-Level Analysis**
 
-This detailed chart compares maternal mortality rates at the country level. It helps to identify outliers and regional variations, offering a basis for targeted policy interventions.
-        """
-    ),
-    (
-        "HDI_Rank_of_Countries_Over_Years.png",
-        """
+This chart compares maternal mortality rates at the national level, revealing which countries perform well and which require targeted interventions.
+            """
+        ),
+        (
+            "HDI_Rank_of_Countries_Over_Years.png",
+            """
 **HDI Rank of Countries Over Years**
 
-This visualization links changes in the Human Development Index (HDI) rankings with maternal mortality trends. It demonstrates that improvements in development generally lead to lower maternal mortality rates.
-        """
-    ),
-    (
-        "Maternal_Mortality_Ratio_VS_Human_Development_Groups.png",
-        """
+This visualization correlates changes in Human Development Index (HDI) rankings with maternal mortality trends. It illustrates that improvements in education, income, and overall well-being are generally linked to lower maternal mortality.
+            """
+        ),
+        (
+            "Maternal_Mortality_Ratio_VS_Human_Development_Groups.png",
+            """
 **Maternal Mortality Ratio vs. Human Development Groups**
 
-By comparing maternal mortality ratios across different human development groups, this graph underscores the correlation between a nation’s level of development and its maternal health outcomes.
-        """
-    ),
-    (
-        "Maternal_Mortality_Ratio_across_UNDP_Developing_Regions.png",
-        """
+By comparing maternal mortality ratios across different human development groups, this graph shows how increased development levels are associated with improved maternal health outcomes.
+            """
+        ),
+        (
+            "Maternal_Mortality_Ratio_across_UNDP_Developing_Regions.png",
+            """
 **Maternal Mortality Ratio Across UNDP Developing Regions**
 
-This chart examines maternal mortality ratios specifically within UNDP-classified developing regions, highlighting areas where urgent healthcare improvements and policy interventions are needed.
-        """
-    )
-]
+This chart focuses on UNDP-classified developing regions, illustrating where maternal mortality remains critically high. It serves as a call-to-action for international support and policy reform in these vulnerable areas.
+            """
+        )
+    ]
 
-for filename, description in ordered_images:
-    image_path = os.path.join("images", filename)
+    # --- Display Images with Their Explanations ---
+    for filename, description in ordered_images:
+        image_path = os.path.join("images", filename)
+        try:
+            img_data = load_image(image_path)
+            st.image(img_data, use_container_width=True)
+            st.markdown(description)
+            st.write("---")
+        except Exception as e:
+            st.error(f"Error loading {filename}: {e}")
+
+    # --- Conclusion / Call-to-Action ---
+    st.markdown("## Moving Forward: Strategies for Change")
+    st.write("""
+    The data and insights presented above reveal the multifaceted challenges of maternal mortality.
+    Improvement requires a holistic strategy that combines healthcare system strengthening, policy reform, community empowerment, and international collaboration.
+    
+    **Key Strategies for Change:**
+    
+    - **Enhancing Healthcare Access:**  
+      Expand and improve maternal care services, especially in high-risk regions.
+      
+    - **Policy Interventions:**  
+      Implement evidence-based policies and allocate resources effectively.
+      
+    - **Community Education:**  
+      Improve awareness and empower communities to support maternal health.
+      
+    - **Global Partnerships:**  
+      Foster collaboration among governments, NGOs, and international organizations to share best practices and resources.
+    """)
+
+# =============================================
+# Pregnancy Risk Prediction Section
+# =============================================
+elif selected_option == 'Pregnancy Risk Prediction':
+    st.title("Pregnancy Risk Prediction")
+
+    st.markdown("""
+    Predicting the risk during pregnancy involves analyzing key parameters such as age, blood glucose levels, diastolic blood pressure, body temperature, and heart rate.
+    Using a trained machine learning model, this tool provides a preliminary risk assessment to help guide early interventions and improve maternal outcomes.
+    """)
+
+    # Load the trained model from Models/finalized_maternal_model.sav
+    model_path = os.path.join("Models", "finalized_maternal_model.sav")
     try:
-        img_data = load_image(image_path)
-        st.image(img_data, use_container_width=True)
-        st.markdown(description)
-        st.write("---")
+        maternal_model = pickle.load(open(model_path, 'rb'))
     except Exception as e:
-        st.error(f"Error loading {filename}: {e}")
+        st.error(f"Error loading prediction model: {e}")
 
-# --- Conclusion / Call-to-Action ---
-st.markdown("## Moving Forward: Strategies for Change")
-st.write("""
-The insights above illustrate the complex challenges of maternal mortality, which is influenced by healthcare quality, socioeconomic conditions, and policy measures.
+    # --- User Input Section ---
+    # Arrange the inputs in columns
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        age_input = st.text_input('Age of the Person', key="age")
+    with col2:
+        diastolicBP_input = st.text_input('Diastolic BP (mmHg)', key="diastolicBP")
+    with col3:
+        BS_input = st.text_input('Blood Glucose (mmol/L)', key="BS")
+    with col1:
+        bodyTemp_input = st.text_input('Body Temperature (Celsius)', key="bodyTemp")
+    with col2:
+        heartRate_input = st.text_input('Heart Rate (BPM)', key="heartRate")
 
-**Key Strategies for Change:**
+    predicted_risk = None
 
-- **Strengthening Healthcare Systems:**  
-  Improve access to comprehensive maternal care across all regions.
-  
-- **Policy Reforms:**  
-  Implement and support evidence-based policies that enhance maternal health services.
-  
-- **Community Empowerment:**  
-  Educate and empower communities to advocate for better healthcare.
-  
-- **International Collaboration:**  
-  Foster global partnerships to share best practices and resources.
+    # --- Prediction and Clear Buttons ---
+    col_button, col_clear = st.columns(2)
+    with col_button:
+        if st.button('Predict Pregnancy Risk'):
+            try:
+                # Convert input values to float; adjust conversions as needed.
+                age = float(age_input)
+                diastolicBP = float(diastolicBP_input)
+                BS = float(BS_input)
+                bodyTemp = float(bodyTemp_input)
+                heartRate = float(heartRate_input)
+                
+                # Predict risk using the model (model expects a 2D list)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    predicted_risk = maternal_model.predict([[age, diastolicBP, BS, bodyTemp, heartRate]])
+                
+                st.subheader("Risk Level:")
+                # Display risk level based on model prediction (assumed 0, 1, 2 mapping to Low, Medium, High)
+                if predicted_risk[0] == 0:
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: green;">Low Risk</p>', unsafe_allow_html=True)
+                elif predicted_risk[0] == 1:
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: orange;">Medium Risk</p>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: red;">High Risk</p>', unsafe_allow_html=True)
+            except ValueError:
+                st.error("Please enter valid numeric values for all parameters.")
+            except Exception as e:
+                st.error(f"An error occurred during prediction: {e}")
 
-Together, these strategies can pave the way for a significant reduction in maternal mortality worldwide.
-""")
+    with col_clear:
+        if st.button("Clear"):
+            st.experimental_rerun()
