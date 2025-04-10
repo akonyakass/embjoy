@@ -11,18 +11,17 @@ st.markdown("""
 
 Maternal mortality refers to the death of a woman during pregnancy, childbirth, or within the postpartum period. It is not just a statistic—it represents the significant challenges many countries face regarding access to quality healthcare, social inequality, and gender equity.
 
-Reducing maternal mortality is a crucial goal for ensuring the wellbeing of families and communities. It is a key indicator of the overall quality of healthcare systems, public health policies, and societal development.  
+Reducing maternal mortality is a crucial goal for ensuring the well-being of families and communities. It is a key indicator of the overall quality of healthcare systems, public health policies, and societal development.
 """)
 
 st.write("""
-Globally, high maternal mortality rates indicate systemic issues in healthcare access, funding, and education. Analyzing the trends across continents, countries, and socio-economic groups helps in identifying target areas for intervention, driving policy changes, and improving outcomes for mothers and their families.
+Globally, high maternal mortality rates indicate systemic issues in healthcare access, funding, and education. Analyzing trends across continents, countries, and socio-economic groups helps in identifying target areas for intervention, driving policy changes, and ultimately improving outcomes for mothers and their families.
 """)
 
-# --- Section 2: Analysis Evidence with Images ---
+# --- Section 2: Evidence & Visual Insights ---
 st.markdown("## Evidence & Visual Insights")
-st.write("Below are a few key visualizations that illustrate trends and patterns in maternal mortality. These images serve as evidence to support our analysis and highlight areas requiring urgent attention:")
+st.write("Below are key visualizations that illustrate trends and patterns in maternal mortality. These images serve as evidence to support our analysis and highlight areas requiring urgent attention:")
 
-# Function to load images from the 'images' folder without using file names for captions
 def load_images_from_folder(folder_path):
     # Retrieve files with common image extensions
     image_filenames = sorted(
@@ -35,15 +34,15 @@ def load_images_from_folder(folder_path):
             images.append(file.read())
     return images
 
-# Load images from the 'images' folder
+# Load images from the "images" folder
 images = load_images_from_folder("images")
 
-# Display the images without captions (you can adjust size using the 'width' parameter)
+# Display each image without captions, scaled to the container width.
 for img in images:
-    st.image(img, use_column_width=True)  # displays each image scaled to the column width
+    st.image(img, use_container_width=True)
 
 # --- Section 3: Conclusion or Call-to-Action ---
 st.markdown("## Moving Forward")
 st.write("""
-The data and visuals presented herein underscore the pressing need to address maternal health challenges worldwide. By understanding where and why these trends occur, stakeholders can work together to implement effective solutions and bring about positive change in maternal healthcare.
+The data and visuals presented highlight the urgent need to address maternal health challenges worldwide. By understanding where and why these trends occur, stakeholders can collaborate to implement effective solutions and bring about positive change in maternal healthcare.
 """)
