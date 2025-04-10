@@ -64,9 +64,5 @@ with col_button:
             st.error(f"An error occurred during prediction: {e}")
 
 with col_clear:
-    if st.button("Clear"):
-        # Safely clear the session state for our keys if they exist.
-        for key in ["age", "diastolicBP", "BS", "bodyTemp", "heartRate"]:
-            if st.session_state.get(key) is not None:
-                st.session_state[key] = ""
-        st.success("Input fields cleared.")
+    if st.button("Clear"): 
+            st.rerun()
