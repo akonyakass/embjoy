@@ -3,7 +3,7 @@ import streamlit as st
 import warnings
 import pickle
 
-# Set page configuration for the predictor page
+# Set page configuration for the predictor section
 st.set_page_config(page_title="Pregnancy Risk Prediction", layout="wide")
 st.title("Pregnancy Risk Prediction")
 
@@ -14,44 +14,39 @@ try:
 except Exception as e:
     st.error(f"Error loading prediction model: {e}")
 
-# Predictor introduction
-content = (
-    "Predicting the risk during pregnancy involves analyzing several parameters, including age, blood sugar levels, "
-    "diastolic blood pressure, body temperature, and heart rate. By evaluating these factors using a machine learning model, "
-    "we can provide a preliminary risk assessment to guide early interventions and improve maternal outcomes."
-)
-st.markdown(f"<div style='white-space: pre-wrap;'><b>{content}</b></div></br>", unsafe_allow_html=True)
+st.markdown("""
+Predicting the risk during pregnancy involves analyzing key parameters such as age, diastolic blood pressure, blood glucose levels, body temperature, and heart rate. This tool leverages a trained machine learning model to provide a preliminary risk evaluation that supports early interventions and improved maternal outcomes.
+""")
 
-# Organize user inputs with columns
+# Initialize text inputs with defaults from session_state (or empty if not present)
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    age_input = st.text_input('Age of the Person', key="age")
+    age_input = st.text_input('Age of the Person', key="age", value=st.session_state.get("age", ""))
 with col2:
-    diastolicBP_input = st.text_input('Diastolic BP (mmHg)', key="diastolicBP")
+    diastolicBP_input = st.text_input('Diastolic BP (mmHg)', key="diastolicBP", value=st.session_state.get("diastolicBP", ""))
 with col3:
-    BS_input = st.text_input('Blood Glucose (mmol/L)', key="BS")
+    BS_input = st.text_input('Blood Glucose (mmol/L)', key="BS", value=st.session_state.get("BS", ""))
 
 with col1:
-    bodyTemp_input = st.text_input('Body Temperature (Celsius)', key="bodyTemp")
+    bodyTemp_input = st.text_input('Body Temperature (Celsius)', key="bodyTemp", value=st.session_state.get("bodyTemp", ""))
 with col2:
-    heartRate_input = st.text_input('Heart Rate (BPM)', key="heartRate")
+    heartRate_input = st.text_input('Heart Rate (BPM)', key="heartRate", value=st.session_state.get("heartRate", ""))
 
 predicted_risk = None
 
-# Buttons for prediction and clear actions
+# Buttons for prediction and clearing the inputs
 col_button, col_clear = st.columns(2)
 with col_button:
     if st.button('Predict Pregnancy Risk'):
         try:
-            # Convert inputs to floats
+            # Convert inputs to numeric values
             age = float(age_input)
             diastolicBP = float(diastolicBP_input)
             BS = float(BS_input)
             bodyTemp = float(bodyTemp_input)
             heartRate = float(heartRate_input)
             
-            # Make the prediction (model expects a 2D array)
+            # Predict risk using the model (ensure it expects a 2D array)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 predicted_risk = maternal_model.predict([[age, diastolicBP, BS, bodyTemp, heartRate]])
@@ -70,4 +65,8 @@ with col_button:
 
 with col_clear:
     if st.button("Clear"):
-        st.experimental_rerun()
+        # Safely clear the session state for our keys if they exist.
+        for key in ["age", "diastolicBP", "BS", "bodyTemp", "heartRate"]:
+            if st.session_state.get(key) is not None:
+                st.session_state[key] = ""
+        st.success("Input fields cleared.")
