@@ -21,6 +21,6 @@ for img_data, file_name in zip(images, image_names):
     base_name = os.path.splitext(file_name)[0]  # e.g. "HDI_Rank_of_Countries_Over_Years"
     
     # Optional: replace underscores with spaces and capitalize words
-    caption_text = base_name.replace("_", " ").title()
+  
     
     st.image(img_data, caption=caption_text)
