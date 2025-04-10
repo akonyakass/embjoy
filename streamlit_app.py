@@ -1,22 +1,67 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-st.title('EmbJoy ML app')
-st.header("Maternal Mortality Analysis")
+# Set the page title and layout
+st.set_page_config(page_title="Maternal Mortality Analysis Dashboard", layout="wide")
+st.title("Maternal Mortality Analysis Dashboard")
 
-st.write("Below is the full analysis of maternal mortality as created in our notebook:")
+# Sidebar for navigation
+analysis_options = [
+    "Mortality Analysis Across Continents Over Years",
+    "HDI Rank of Countries Over Years",
+    "Mortality Analysis - Continents",
+    "Mortality Analysis - Countries",
+    "Maternal Mortality Ratio Vs Human Development Groups",
+    "Maternal Mortality Ratio Across UNDP Developing Regions"
+]
 
-# Try to load and embed the analysis HTML file.
-try:
-    # If the file is in the same directory, use:
-    with open('analysis.html', 'r', encoding='utf-8') as file:
-        html_data = file.read()
-    # If it's in a folder (e.g., 'html'), update the file path accordingly:
-    # with open('html/analysis.html', 'r', encoding='utf-8') as file:
-    #     html_data = file.read()
+choice = st.sidebar.radio("Select Analysis Section", analysis_options)
 
-    # Embed the HTML in the Streamlit app.
-    # Adjust the 'height' parameter to suit the content length.
-    components.html(html_data, height=800, scrolling=True)
-except Exception as e:
-    st.error("Could not load the analysis HTML file. Please ensure the file is in the correct location.")
+# Based on the selection, display the corresponding content
+if choice == analysis_options[0]:
+    st.header("Mortality Analysis Across Continents Over Years")
+    st.write("""
+        This section shows the trends of maternal mortality across different continents over the years.
+        *Key finding*: [Insert your key statistics and interpretations here.]
+    """)
+    # Display an image or an interactive plot
+    st.image("images/mortality_continents_years.png", caption="Trends Across Continents")
+    
+elif choice == analysis_options[1]:
+    st.header("HDI Rank of Countries Over Years")
+    st.write("""
+        Analysis of how the Human Development Index (HDI) ranking of various countries has changed over time.
+        *Key finding*: [Insert your findings and numbers here.]
+    """)
+    st.image("images/hdi_rank_years.png", caption="HDI Ranking Over Years")
+    
+elif choice == analysis_options[2]:
+    st.header("Mortality Analysis - Continents")
+    st.write("""
+        Detailed statistics for maternal mortality rates per continent.
+        *Key finding*: [Your insights can be added here.]
+    """)
+    st.image("images/mortality_by_continent.png", caption="Mortality by Continents")
+    
+elif choice == analysis_options[3]:
+    st.header("Mortality Analysis - Countries")
+    st.write("""
+        Country-level analysis of maternal mortality with comparative statistics.
+        *Key finding*: [Insert insights and numbers here.]
+    """)
+    st.image("images/mortality_by_country.png", caption="Mortality by Countries")
+    
+elif choice == analysis_options[4]:
+    st.header("Maternal Mortality Ratio Vs Human Development Groups")
+    st.write("""
+        Comparison between maternal mortality ratios and various human development groups.
+        *Key finding*: [Summarize your observations here.]
+    """)
+    st.image("images/mortality_vs_hdi_groups.png", caption="Mortality vs HDI Groups")
+    
+elif choice == analysis_options[5]:
+    st.header("Maternal Mortality Ratio Across UNDP Developing Regions")
+    st.write("""
+        Analysis of maternal mortality ratios across different UNDP developing regions.
+        *Key finding*: [Report the main conclusions here.]
+    """)
+    st.image("images/mortality_undp_regions.png", caption="Mortality across UNDP Regions")
