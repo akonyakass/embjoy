@@ -1,6 +1,8 @@
 import os
 import streamlit as st
 
+st.set_page_config(page_title="Maternal Mortality Analysis Dashboard", layout="wide")
+st.title("Maternal Mortality Analysis Dashboard")
 def load_images_from_folder(folder_path):
     # Get a list of image filenames (you can modify the extensions list as needed)
     image_filenames = sorted(
