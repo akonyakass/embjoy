@@ -1,5 +1,5 @@
-import streamlit as st
+bimport streamlit as st
 
-st.title('🎈 App Name')
+st.title('EmbJoy ML app')
 
 st.write('Hello world!')
