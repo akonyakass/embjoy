@@ -5,135 +5,118 @@ import streamlit as st
 st.set_page_config(page_title="Maternal Mortality: Importance & Impact", layout="wide")
 st.title("Maternal Mortality: Importance & Impact")
 
-# --- Section 1: Introduction & In-depth Bio ---
+# --- Section 1: In-depth Introduction & Background ---
 st.markdown("""
 ## Understanding Maternal Mortality
 
-Maternal mortality is a critical indicator that reflects the quality of healthcare, socioeconomic conditions, and public health policies in a region. It represents the death of a woman during pregnancy, childbirth, or within 42 days of delivery, due to complications related to these processes. Every maternal death is not just a loss of an individual; it reverberates through families, communities, and entire healthcare systems.
+Maternal mortality refers to the death of a woman during pregnancy, childbirth, or within 42 days of delivery due to complications related to these events. It is a critical indicator of the quality of a healthcare system, social equity, and the overall socioeconomic development of a region.
 
-### Why Is This Issue Vital?
+### Why Is This Issue Critical?
 
-- **Human Rights & Equity:**  
-  Access to quality maternal healthcare is a fundamental human right. Disparities in maternal health outcomes often expose underlying inequities in society.
-  
+- **Human Rights and Equity:**  
+  Every maternal death is a tragedy that reflects systemic failures, including inadequate healthcare access, insufficient education, and underlying social inequalities.
+
 - **Economic and Social Impact:**  
-  High maternal mortality rates disrupt families, lower community productivity, and create long-lasting emotional and financial burdens.
-  
-- **Indicator of Healthcare Systems:**  
-  Maternal mortality is considered a sensitive indicator of the overall health infrastructure, as it is influenced by factors like access to skilled care, emergency services, and effective health policies.
+  High maternal mortality disrupts families and communities, leading to long-term economic and social challenges. The loss of a mother can have ripple effects on child development and community well-being.
 
-Reducing maternal mortality involves addressing deep-rooted issues related to poverty, education, and gender inequality. Evidence-based data and insightful analysis are crucial for developing targeted interventions that can ultimately save lives.
-""")
+- **Indicator of Healthcare Quality:**  
+  Maternal mortality is not just a statistic; it is a measure of how well or how poorly a nation provides care to its most vulnerable population—expectant and new mothers.
 
-st.write("""
-In this dashboard, you will find a series of comprehensive visualizations that not only depict trends but also uncover the systemic issues contributing to maternal mortality. The insights presented here are aimed at educating stakeholders, policymakers, and the general public on the importance of improving maternal health standards globally.
+Addressing maternal mortality requires targeted, evidence-based interventions and a sustained commitment to improving health infrastructure, policy, and education. The visuals and data presented in this dashboard offer insight into the global trends, regional disparities, and the relationship between human development and maternal health outcomes.
 """)
 
 # --- Section 2: Evidence & Detailed Visual Insights ---
 st.markdown("## Evidence & Detailed Visual Insights")
 st.write("""
-The following visualizations serve as robust evidence to understand the complexities and trends in maternal mortality. Each image is accompanied by a thorough explanation of its significance, methodology, and findings. These visual insights are instrumental in highlighting disparities, progress, and areas that need immediate attention.
+The following sections present key visual analyses that underscore the realities of maternal mortality. Each visualization is accompanied by detailed commentary on its findings and implications. These data-driven insights are intended to serve as a call-to-action for policymakers, healthcare providers, and communities.
 """)
 
-def load_images_with_filenames(folder_path):
-    """
-    Load all images in the given folder and return a dictionary mapping
-    each filename to its binary data.
-    """
-    image_dict = {}
-    image_filenames = sorted(
-        [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+# Create a function to load an image given its file path in binary mode
+def load_image(path):
+    with open(path, "rb") as file:
+        return file.read()
+
+# Define the desired order as a list of tuples with (filename, detailed description)
+ordered_images = [
+    (
+        "maternal_mortality_ratio_trends.png",
+        """
+**Mortality Analysis Across Continents Over Years**
+
+This visualization presents an in-depth analysis of maternal mortality ratio trends from 1990 to 2021 across various continents. The chart clearly shows how different regions have fared over the decades, emphasizing both progress made and areas that continue to face significant challenges. It brings attention to the persistent disparities among continents, reflecting differences in healthcare systems, economic development, and governmental policies.
+        """
+    ),
+    (
+        "average_maternal_mortality_ratio_continent.png",
+        """
+**Continental Overview**
+
+This graph summarizes the average maternal mortality ratios for each continent. By providing a continent-level breakdown, the chart makes it easier to compare regions side by side. It highlights which continents have managed to reduce maternal mortality effectively and which remain burdened by higher rates, underlining the critical need for further investment in maternal healthcare in some regions.
+        """
+    ),
+    (
+        "average_maternal_mortality_ratio_country.png",
+        """
+**Country-Level Analysis**
+
+Focusing on individual countries, this detailed chart offers a comparative look at maternal mortality rates on a national scale. The granular analysis sheds light on significant outliers and emphasizes the importance of country-specific strategies. In countries where progress is slow, this visualization serves as a diagnostic tool to identify underlying issues and inform targeted policy interventions.
+        """
+    ),
+    (
+        "HDI_Rank_of_Countries_Over_Years.png",
+        """
+**HDI Rank of Countries Over Years**
+
+This visualization tracks the evolution of Human Development Index (HDI) rankings over the years alongside maternal mortality data. It explores the relationship between human development and maternal health outcomes, demonstrating that improvements in education, income, and life expectancy generally correlate with lower maternal mortality. This graph serves as an important reminder of the broader socioeconomic determinants of health.
+        """
+    ),
+    (
+        "Maternal_Mortality_Ratio_VS_Human_Development_Groups.png",
+        """
+**Maternal Mortality Ratio vs. Human Development Groups**
+
+By contrasting maternal mortality ratios with various human development groups, this graph provides clear evidence of the correlation between a nation’s level of development and its maternal health outcomes. It emphasizes that higher development levels—characterized by better healthcare systems, higher education, and stronger economies—tend to be associated with lower rates of maternal mortality, thus reinforcing the need for integrated development approaches.
+        """
+    ),
+    (
+        "Maternal_Mortality_Ratio_across_UNDP_Developing_Regions.png",
+        """
+**Maternal Mortality Ratio Across UNDP Developing Regions**
+
+This chart examines maternal mortality ratios specifically within regions classified as developing by the United Nations Development Programme (UNDP). It identifies those regions where maternal mortality remains alarmingly high despite global efforts. The visualization is a call-to-action for international collaboration, pinpointing areas where urgent healthcare improvements and investment are necessary to save lives.
+        """
     )
-    for filename in image_filenames:
-        full_path = os.path.join(folder_path, filename)
-        with open(full_path, "rb") as file:
-            image_dict[filename] = file.read()
-    return image_dict
+]
 
-# Load images from the "images" folder
-images = load_images_with_filenames("images")
-
-# Define long, detailed descriptions for each image based on its filename
-descriptions = {
-    "maternal_mortality_ratio_trends.png": (
-        "### Maternal Mortality Ratio Trends (1990-2021) by Continent\n\n"
-        "This detailed line graph illustrates how maternal mortality ratios have evolved across various continents "
-        "over the period from 1990 to 2021. The trends highlight both progress and persistent challenges, revealing that "
-        "while some regions have made substantial improvements in reducing maternal deaths, others continue to face high risks. "
-        "This visualization underscores the disparities in healthcare access, economic development, and public health policies "
-        "that are directly related to maternal health outcomes. It serves as a wake-up call for targeted interventions where "
-        "improvements are most needed."
-    ),
-    "HDI_Rank_of_Countries_Over_Years.png": (
-        "### Evolution of HDI Rankings in Relation to Maternal Mortality\n\n"
-        "This graph tracks the changes in Human Development Index (HDI) rankings over the years for different countries, "
-        "providing an indirect measurement of how socioeconomic factors correlate with maternal mortality trends. As HDI improves, "
-        "we typically observe enhancements in healthcare services and maternal health outcomes. Conversely, stagnation or decline in "
-        "HDI can often be associated with persistently high maternal mortality rates. The visualization acts as a stark reminder "
-        "of the link between human development and the capacity of countries to safeguard maternal health."
-    ),
-    "average_maternal_mortality_ratio_continent.png": (
-        "### Average Maternal Mortality Ratios by Continent\n\n"
-        "This chart presents the average maternal mortality ratios segregated by continent. It provides a concise summary of the "
-        "regional performance in maternal health care. By comparing these averages, the visualization highlights the stark contrasts "
-        "between different parts of the world. It emphasizes that regions with lower average ratios have typically invested more in "
-        "healthcare infrastructure and preventive measures, whereas high averages indicate areas that face significant challenges "
-        "in delivering consistent maternal care."
-    ),
-    "average_maternal_mortality_ratio_country.png": (
-        "### Country-Level Maternal Mortality Analysis\n\n"
-        "Focusing on individual countries, this detailed chart compares maternal mortality rates across nations. The granular "
-        "analysis reveals not only which countries are performing well but also those that are lagging behind. By providing a "
-        "country-level breakdown, it becomes easier to pinpoint where specific healthcare improvements and policy interventions "
-        "are required. This detailed view is critical for governments and international organizations aiming to implement targeted "
-        "strategies for improving maternal outcomes."
-    ),
-    "Maternal_Mortality_Ratio_VS_Human_Development_Groups.png": (
-        "### Maternal Mortality vs. Human Development Groups\n\n"
-        "This comparative graph juxtaposes maternal mortality ratios against various human development groups. The contrasting trends "
-        "highlight how development levels influence healthcare outcomes, especially in maternal health. The underlying data suggests "
-        "a strong correlation: regions with higher human development tend to exhibit lower maternal mortality rates. This insight "
-        "is crucial for advocating improvements in education, economic growth, and healthcare provisions as integrated parts of a "
-        "holistic approach to reducing maternal deaths."
-    ),
-    "Maternal_Mortality_Ratio_across_UNDP_Developing_Regions.png": (
-        "### Maternal Mortality Across UNDP Developing Regions\n\n"
-        "Focusing on the regions identified by the United Nations Development Programme (UNDP) as developing, this visualization "
-        "provides a critical examination of maternal mortality ratios across these areas. The chart reveals the areas with urgent "
-        "needs for healthcare investment and policy reforms. It demonstrates how factors such as poverty, limited access to medical services, "
-        "and social instability converge to affect maternal health. This clear portrayal invites international collaboration and targeted "
-        "assistance to improve maternal outcomes in vulnerable regions."
-    )
-}
-
-# Display each image along with its detailed description.
-for filename, img_data in images.items():
-    if filename in descriptions:
-        st.image(img_data, use_container_width=True)  # Display the image scaled to the container
-        st.markdown(descriptions[filename])
-        st.write("---")  # A horizontal separator for clarity between sections
-    else:
+# Loop through the ordered list and display each image with its detailed description
+for filename, description in ordered_images:
+    image_path = os.path.join("images", filename)
+    try:
+        img_data = load_image(image_path)
         st.image(img_data, use_container_width=True)
+        st.markdown(description)
+        st.write("---")  # Horizontal separator between sections
+    except Exception as e:
+        st.error(f"Error loading {filename}: {e}")
 
 # --- Section 3: Conclusion and Future Directions ---
-st.markdown("## Moving Forward: Strategies for Improvement")
+st.markdown("## Moving Forward: Strategies for Change")
 st.write("""
-The comprehensive data and detailed visual evidence presented above highlight the multifaceted challenges of maternal mortality. 
-They make it clear that addressing maternal health is not simply a medical issue—it is also deeply intertwined with economic, social, 
-and political factors. The path to reducing maternal mortality involves:
-  
-- **Strengthening Healthcare Infrastructure:**  
-  Expanding access to quality prenatal, delivery, and postnatal care, especially in low-resource settings.
-  
-- **Enhancing Policy and Governance:**  
-  Implementing evidence-based policies that focus on maternal health as a critical component of public health.
-  
-- **Empowering Communities:**  
-  Investing in education and social services to improve overall human development and community resilience.
-  
-- **International Collaboration:**  
-  Engaging with global partners to share knowledge, resources, and best practices in tackling maternal mortality.
+The comprehensive data and detailed visual evidence presented above shed light on the multifaceted challenges of maternal mortality. They clearly demonstrate that improving maternal health is not solely a medical challenge but also a social, economic, and political imperative.
 
-By understanding the trends and underlying causes through rigorous data analysis, stakeholders can work together to create sustainable change. 
-The goal is not just to reduce statistics, but to transform lives and ensure that every mother has access to the care she needs.
+**Key Strategies for Reducing Maternal Mortality:**
+
+- **Strengthening Healthcare Systems:**  
+  Expanding access to quality prenatal, delivery, and postnatal care, particularly in underserved regions.
+
+- **Policy Enhancement:**  
+  Implementing robust, evidence-based health policies that focus on maternal well-being and create sustainable healthcare infrastructures.
+
+- **Empowering Communities:**  
+  Investing in education and public awareness campaigns, enabling communities to take proactive steps towards improving maternal health.
+
+- **International Collaboration:**  
+  Encouraging partnerships among governments, international organizations, and local stakeholders to share resources, expertise, and best practices.
+
+By understanding the trends and insights presented, we can advocate for meaningful, coordinated actions that transform maternal healthcare and save lives around the world.
 """)
