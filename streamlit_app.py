@@ -24,7 +24,7 @@ if choice == analysis_options[0]:
         *Key finding*: [Insert your key statistics and interpretations here.]
     """)
     # Display an image or an interactive plot
-    st.image("images/mortality_continents_years.png", caption="Trends Across Continents")
+    st.image("images/maternal_mortality_ratio_trends.png", caption="Trends Across Continents")
     
 elif choice == analysis_options[1]:
     st.header("HDI Rank of Countries Over Years")
@@ -32,7 +32,7 @@ elif choice == analysis_options[1]:
         Analysis of how the Human Development Index (HDI) ranking of various countries has changed over time.
         *Key finding*: [Insert your findings and numbers here.]
     """)
-    st.image("images/hdi_rank_years.png", caption="HDI Ranking Over Years")
+    st.image("images/HDI_Rank_of_Countries_Over_Years.png", caption="HDI Ranking Over Years")
     
 elif choice == analysis_options[2]:
     st.header("Mortality Analysis - Continents")
@@ -40,7 +40,7 @@ elif choice == analysis_options[2]:
         Detailed statistics for maternal mortality rates per continent.
         *Key finding*: [Your insights can be added here.]
     """)
-    st.image("images/mortality_by_continent.png", caption="Mortality by Continents")
+    st.image("images/average_maternal_mortality_ratio_continent.png", caption="Mortality by Continents")
     
 elif choice == analysis_options[3]:
     st.header("Mortality Analysis - Countries")
@@ -48,7 +48,7 @@ elif choice == analysis_options[3]:
         Country-level analysis of maternal mortality with comparative statistics.
         *Key finding*: [Insert insights and numbers here.]
     """)
-    st.image("images/mortality_by_country.png", caption="Mortality by Countries")
+    st.image("images/average_maternal_mortality_ratio_country.png", caption="Mortality by Countries")
     
 elif choice == analysis_options[4]:
     st.header("Maternal Mortality Ratio Vs Human Development Groups")
@@ -56,7 +56,7 @@ elif choice == analysis_options[4]:
         Comparison between maternal mortality ratios and various human development groups.
         *Key finding*: [Summarize your observations here.]
     """)
-    st.image("images/mortality_vs_hdi_groups.png", caption="Mortality vs HDI Groups")
+    st.image("images/Maternal_Mortality_Ratio_VS_Human_Development_Groups.png", caption="Mortality vs HDI Groups")
     
 elif choice == analysis_options[5]:
     st.header("Maternal Mortality Ratio Across UNDP Developing Regions")
@@ -64,4 +64,4 @@ elif choice == analysis_options[5]:
         Analysis of maternal mortality ratios across different UNDP developing regions.
         *Key finding*: [Report the main conclusions here.]
     """)
-    st.image("images/mortality_undp_regions.png", caption="Mortality across UNDP Regions")
+    st.image("images/Maternal_Mortality_Ratio_across_UNDP_Developing_Regions.png", caption="Mortality across UNDP Regions")
