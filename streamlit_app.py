@@ -148,8 +148,8 @@ if selected_option == 'Pregnancy Risk Prediction':
     st.title("Pregnancy Risk Prediction")
 
     st.markdown("""
-    Предсказание риска материнской смертности на основе пяти параметров:
-    возраст, диастолическое давление, уровень глюкозы, температура тела и ЧСС.
+    Predicting the risk during pregnancy involves analyzing key parameters such as age, blood glucose levels, diastolic blood pressure, body temperature, and heart rate.
+    Using a trained machine learning model, this tool provides a preliminary risk assessment to help guide early interventions and improve maternal outcomes.
     """)
 
     # --- Load model and scaler ---
@@ -159,7 +159,7 @@ if selected_option == 'Pregnancy Risk Prediction':
     try:
         maternal_model = load(model_path)
     except Exception as e:
-        st.error(f"Не удалось загрузить модель: {e}")
+        st.error(f"Can't open the model: {e}")
         st.stop()
 
     use_scaler = False
@@ -169,7 +169,7 @@ if selected_option == 'Pregnancy Risk Prediction':
                 scaler = pickle.load(f)
             use_scaler = True
         except Exception as e:
-            st.warning(f"Скалер не загрузился: {e}\nБудем предсказывать без него.")
+            st.warning(f"Oh no")
 
     # --- User Input Section ---
     col1, col2, col3 = st.columns(3)
@@ -199,7 +199,7 @@ if selected_option == 'Pregnancy Risk Prediction':
                 low, med, high = probs
                 st.write(f"Class probabilities — Low: {low:.2f}, Medium: {med:.2f}, High: {high:.2f}")
             except AttributeError:
-                st.info("Модель не поддерживает predict_proba().")
+                st.info("...")
                 low = med = high = None
 
             if low is not None:
