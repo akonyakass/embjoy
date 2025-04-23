@@ -144,12 +144,12 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 # =============================================
 # Pregnancy Risk Prediction Section
 # =============================================
-if selected_option == 'Pregnancy Risk Prediction':
+elif selected_option == 'Pregnancy Risk Prediction':
     st.title("Pregnancy Risk Prediction")
 
     st.markdown("""
-    Predicting the risk during pregnancy involves analyzing key parameters such as age, blood glucose levels, diastolic blood pressure, body temperature, and heart rate.
-    Using a trained machine learning model, this tool provides a preliminary risk assessment to help guide early interventions and improve maternal outcomes.
+    Predicting risk based on five parameters:
+    age, diastolic blood pressure, blood glucose, body temperature, and heart rate.
     """)
 
     # --- Load model and scaler ---
@@ -159,7 +159,7 @@ if selected_option == 'Pregnancy Risk Prediction':
     try:
         maternal_model = load(model_path)
     except Exception as e:
-        st.error(f"Can't open the model: {e}")
+        st.error(f"Не удалось загрузить модель: {e}")
         st.stop()
 
     use_scaler = False
@@ -169,59 +169,75 @@ if selected_option == 'Pregnancy Risk Prediction':
                 scaler = pickle.load(f)
             use_scaler = True
         except Exception as e:
-            st.warning(f"Oh no")
+            st.warning(f"Скалер не загрузился: {e}\nБудем предсказывать без него.")
 
     # --- User Input Section ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age        = st.number_input('Age (years)',            min_value=10.0, max_value=60.0,  value=28.0, step=0.1)
+        age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolic  = st.number_input('Diastolic BP (mmHg)',    min_value=40.0, max_value=180.0, value=80.0, step=0.1)
+        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0, 180.0, 80.0, step=0.1)
     with col3:
-        glucose    = st.number_input('Blood Glucose (mmol/L)', min_value=3.0,  max_value=15.0,  value=5.2,  step=0.1)
+        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,  5.2, step=0.1)
     with col1:
-        temp       = st.number_input('Body Temperature (°C)',  min_value=35.0, max_value=40.0,  value=36.6, step=0.1)
+        temp       = st.number_input('Body Temperature (°C)',  35.0, 40.0, 36.6, step=0.1)
     with col2:
-        heart_rate = st.number_input('Heart Rate (BPM)',       min_value=40.0, max_value=200.0, value=72.0, step=1.0)
+        heart_rate = st.number_input('Heart Rate (BPM)',       40.0,200.0, 72.0, step=1.0)
 
     # --- Predict & Clear Buttons ---
     col_button, col_clear = st.columns(2)
     with col_button:
         if st.button('Predict Pregnancy Risk'):
+            # Prepare features
             X = [[age, diastolic, glucose, temp, heart_rate]]
             if use_scaler:
                 X = scaler.transform(X)
 
             st.write("**Features for model:**", X)
 
+            # Debug: print raw probabilities
             try:
                 probs = maternal_model.predict_proba(X)[0]
                 low, med, high = probs
-                st.write(f"Class probabilities — Low: {low:.2f}, Medium: {med:.2f}, High: {high:.2f}")
+                st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
             except AttributeError:
-                st.info("...")
+                st.info("Модель не поддерживает predict_proba().")
                 low = med = high = None
 
+            # Threshold-based decision (check high/med first)
             if low is not None:
-                if low >= 0.50:
-                    pred_label, color = "Low Risk", "green"
+                if high >= 0.30:
+                    label, color = "High Risk", "red"
                 elif med >= 0.30:
-                    pred_label, color = "Medium Risk", "orange"
+                    label, color = "Medium Risk", "orange"
+                elif low >= 0.30:
+                    label, color = "Low Risk", "green"
                 else:
-                    pred_label, color = "High Risk", "red"
+                    idx = probs.argmax()
+                    label, color = {
+                        0: ("Low Risk",    "green"),
+                        1: ("Medium Risk", "orange"),
+                        2: ("High Risk",   "red")
+                    }[idx]
             else:
                 pred = maternal_model.predict(X)[0]
-                pred_label, color = {
-                    0: ("Low Risk", "green"),
+                label, color = {
+                    0: ("Low Risk",    "green"),
                     1: ("Medium Risk", "orange"),
-                    2: ("High Risk", "red")
+                    2: ("High Risk",   "red")
                 }[pred]
 
             st.markdown(
-                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{pred_label}</p>",
+                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
                 unsafe_allow_html=True
             )
 
     with col_clear:
         if st.button("Clear"):
-            st.experimental_rerun()
+            st.rerun()  # use st.rerun() for clearing inputs
+
+
+
+
+
+
