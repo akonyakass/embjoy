@@ -143,6 +143,8 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 
 # =============================================
 # Pregnancy Risk Prediction Section
+# =============================================
+# Pregnancy Risk Prediction Section
 elif selected_option == 'Pregnancy Risk Prediction':
     st.title('Pregnancy Risk Prediction')
     st.markdown("""
@@ -150,8 +152,15 @@ elif selected_option == 'Pregnancy Risk Prediction':
         including age, blood sugar levels, blood pressure, temperature, and heart rate.
     """, unsafe_allow_html=True)
 
-    # Load the model
-    maternal_model = pickle.load(open("model/finalized_maternal_model.sav",'rb'))
+    from joblib import load
+
+    # Load the model (Joblib format)
+    model_path = os.path.join("Models", "finalized_maternal_model.joblib")
+    try:
+        maternal_model = load(model_path)
+    except FileNotFoundError:
+        st.error(f"Model file not found at `{model_path}`")
+        st.stop()
 
     # User inputs as numbers
     col1, col2, col3 = st.columns(3)
@@ -162,7 +171,7 @@ elif selected_option == 'Pregnancy Risk Prediction':
     with col3:
         BS         = st.number_input('Blood Glucose (mmol/L)', 3.0,  15.0,  5.2, step=0.1)
     with col1:
-        bodyTemp   = st.number_input('Body Temperature (°C)',  35.0, 140.0, 36.6, step=0.1)
+        bodyTemp   = st.number_input('Body Temperature (°F)',  95.0, 110.0, 98.6, step=0.1)
     with col2:
         heartRate  = st.number_input('Heart Rate (BPM)',       40.0, 200.0, 72.0, step=1.0)
 
@@ -175,7 +184,7 @@ elif selected_option == 'Pregnancy Risk Prediction':
             st.error(f"Ошибка при predict: {e}")
             st.stop()
 
-        # Display
+        # Display mapping
         if pred == 0:
             st.markdown('<h2 style="color:green">Low Risk</h2>', unsafe_allow_html=True)
         elif pred == 1:
@@ -186,4 +195,3 @@ elif selected_option == 'Pregnancy Risk Prediction':
     # Clear button
     if st.button("Clear"):
         st.experimental_rerun()
- 
