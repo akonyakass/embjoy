@@ -143,40 +143,84 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 
 # =============================================
 # Pregnancy Risk Prediction Section
-from joblib import load
-import pickle
-import pandas as pd
+elif selected_option == 'Pregnancy Risk Prediction':
+    st.title("Pregnancy Risk Prediction")
 
-# загрузка
-model = load("Models/finalized_maternal_model.joblib")
-with open("Models/scaler.sav","rb") as f:
-    scaler = pickle.load(f)
+    st.markdown("""
+    Predicting risk based on five parameters:
+    age, diastolic blood pressure, blood glucose, body temperature (°F), and heart rate.
+    """)
 
-# пользовательский ввод
-age        = st.number_input('Age (years)', 10.0, 60.0, 28.0, step=0.1)
-diastolic  = st.number_input('Diastolic BP (mmHg)', 40.0,180.0,80.0, step=0.1)
-glucose    = st.number_input('Blood Glucose (mmol/L)', 3.0,15.0,5.2, step=0.1)
-temp_f=     st.number_input('Body Temperature (°C)', 35.0,100,36.6, step=0.1)
-heart_rate = st.number_input('Heart Rate (BPM)', 40.0,200.0,72.0, step=1.0)
+    # --- Load model and scaler ---
+    from joblib import load
+    import pickle
+    import pandas as pd
 
-if st.button("Predict Pregnancy Risk"):
-    # 1) C→F
-
-    # 2) DataFrame с теми же колонками
-    df_X = pd.DataFrame([[age, diastolic, glucose, temp_f, heart_rate]],
-                        columns=['Age','DiastolicBP','BS','BodyTemp','HeartRate'])
-    # 3) Скалирование
-    X_scaled = scaler.transform(df_X)
-    st.write("Features post-scaling:", X_scaled.tolist())
-    # 4) Предсказание
-    pred = model.predict(X_scaled)[0]
-    # опционально: выводим вероятности
+    model_path  = os.path.join("Models", "finalized_maternal_model.joblib")
+    scaler_path = os.path.join("Models", "scaler.sav")
     try:
-        probs = model.predict_proba(X_scaled)[0]
-        st.write(f"Probs Low/Med/High: {probs.round(2)}")
-    except:
-        pass
-    # 5) Вывод
-    label, color = {0:("Low Risk","green"),1:("Medium Risk","orange"),2:("High Risk","red")}[pred]
-    st.markdown(f"<h2 style='color:{color}'>{label}</h2>", unsafe_allow_html=True)
+        maternal_model = load(model_path)
+    except Exception as e:
+        st.error(f"Не удалось загрузить модель: {e}")
+        st.stop()
+
+    use_scaler = False
+    if os.path.exists(scaler_path):
+        try:
+            with open(scaler_path, "rb") as f:
+                scaler = pickle.load(f)
+            use_scaler = True
+        except Exception as e:
+            st.warning(f"Скалер не загрузился: {e}\nБудем предсказывать без него.")
+
+    # --- User inputs ---
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
+    with col2:
+        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0,180.0, 80.0, step=0.1)
+    with col3:
+        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,  5.2, step=0.1)
+    with col1:
+        temp_f     = st.number_input('Body Temperature (°F)',  95.0,110.0, 98.6, step=0.1)
+    with col2:
+        heart_rate = st.number_input('Heart Rate (BPM)',       40.0,200.0, 72.0, step=1.0)
+
+    # --- Predict & Clear buttons ---
+    col_button, col_clear = st.columns(2)
+    with col_button:
+        if st.button('Predict Pregnancy Risk'):
+            # Build DataFrame with same feature names as in training
+            df_X = pd.DataFrame(
+                [[age, diastolic, glucose, temp_f, heart_rate]],
+                columns=['Age','DiastolicBP','BS','BodyTemp','HeartRate']
+            )
+
+            # Scale features if scaler is present
+            X_scaled = scaler.transform(df_X) if use_scaler else df_X.values
+            st.write("**Features for model (post-scaling):**", X_scaled.tolist())
+
+            # Show class probabilities
+            try:
+                probs = maternal_model.predict_proba(X_scaled)[0]
+                st.write(f"🔍 Probs Low={probs[0]:.2f}, Med={probs[1]:.2f}, High={probs[2]:.2f}")
+            except AttributeError:
+                st.info("Модель не поддерживает predict_proba().")
+
+            # Final prediction (argmax)
+            pred = maternal_model.predict(X_scaled)[0]
+            label, color = {
+                0: ("Low Risk",    "green"),
+                1: ("Medium Risk", "orange"),
+                2: ("High Risk",   "red")
+            }[pred]
+
+            st.markdown(
+                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
+                unsafe_allow_html=True
+            )
+
+    with col_clear:
+        if st.button("Clear"):
+            st.rerun()
 
