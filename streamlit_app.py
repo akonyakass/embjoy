@@ -147,90 +147,63 @@ elif selected_option == 'Pregnancy Risk Prediction':
     st.title("Pregnancy Risk Prediction")
 
     st.markdown("""
-    Предсказание риска материнской смертности на основе пяти параметров:
-    возраст, диастолическое давление, уровень глюкозы, температура тела и ЧСС.
+    Predicting the risk during pregnancy involves analyzing key parameters such as age, blood glucose levels, diastolic blood pressure, body temperature, and heart rate.
+    Using a trained machine learning model, this tool provides a preliminary risk assessment to help guide early interventions and improve maternal outcomes.
     """)
 
-    # --- Загрузка модели и скалера ---
-    model_path  = os.path.join("Models", "finalized_maternal_model.sav")
-    scaler_path = os.path.join("Models", "scaler.sav")
+    # Load the trained model from Models/finalized_maternal_model.sav
+    model_path = os.path.join("Models", "finalized_maternal_model.sav")
     try:
         maternal_model = pickle.load(open(model_path, 'rb'))
     except Exception as e:
-        st.error(f"Не удалось загрузить модель: {e}")
-        st.stop()
+        st.error(f"Error loading prediction model: {e}")
 
-    use_scaler = False
-    if os.path.exists(scaler_path):
-        try:
-            scaler = pickle.load(open(scaler_path, 'rb'))
-            use_scaler = True
-        except Exception as e:
-            st.warning(f"Скалер не загрузился: {e}\nБудем предсказывать без него.")
-
-    # --- Ввод данных пользователем ---
+    # --- User Input Section ---
+    # Arrange the inputs in columns
     col1, col2, col3 = st.columns(3)
     with col1:
-        age        = st.number_input('Age (years)',           10.0, 60.0, 28.0, step=0.1)
+        age_input = st.text_input('Age of the Person', key="age")
     with col2:
-        diastolic  = st.number_input('Diastolic BP (mmHg)',   40.0, 180.0, 80.0, step=0.1)
+        diastolicBP_input = st.text_input('Diastolic BP (mmHg)', key="diastolicBP")
     with col3:
-        glucose    = st.number_input('Blood Glucose (mmol/L)', 3.0,  15.0,  5.2, step=0.1)
+        BS_input = st.text_input('Blood Glucose (mmol/L)', key="BS")
     with col1:
-        temp       = st.number_input('Body Temperature (°C)', 35.0,  40.0, 36.6, step=0.1)
+        bodyTemp_input = st.text_input('Body Temperature (Celsius)', key="bodyTemp")
     with col2:
-        heart_rate = st.number_input('Heart Rate (BPM)',      40.0, 200.0,  72.0, step=1.0)
+        heartRate_input = st.text_input('Heart Rate (BPM)', key="heartRate")
 
-    # --- Кнопки Predict и Clear ---
+    predicted_risk = None
+
+    # --- Prediction and Clear Buttons ---
     col_button, col_clear = st.columns(2)
     with col_button:
         if st.button('Predict Pregnancy Risk'):
-            # Собираем фичи
-            X = [[age, diastolic, glucose, temp, heart_rate]]
-            # Применяем скейлинг, если есть
-            if use_scaler:
-                X = scaler.transform(X)
-
-            # Показываем фичи для отладки
-            st.write("**Features for model:**", X)
-
-            # Получаем вероятности (если поддерживается)
             try:
-                probs = maternal_model.predict_proba(X)[0]
-                low, med, high = probs
-                st.write(f"Class probabilities — Low: {low:.2f}, Medium: {med:.2f}, High: {high:.2f}")
-            except AttributeError:
-                # Если модель не имеет predict_proba
-                st.info("Модель не поддерживает predict_proba(). Автоматически используем argmax.")
-
-                # Получаем вероятности заглушкой одинаковых весов
-                low = med = high = None
-
-            # Пороговое правило вместо простого argmax
-            if low is not None:
-                if low >= 0.50:
-                    pred_label, color = "Low Risk", "green"
-                elif med >= 0.30:
-                    pred_label, color = "Medium Risk", "orange"
+                # Convert input values to float; adjust conversions as needed.
+                age = float(age_input)
+                diastolicBP = float(diastolicBP_input)
+                BS = float(BS_input)
+                bodyTemp = float(bodyTemp_input)
+                heartRate = float(heartRate_input)
+                
+                # Predict risk using the model (model expects a 2D list)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    predicted_risk = maternal_model.predict([[age, diastolicBP, BS, bodyTemp, heartRate]])
+                
+                st.subheader("Risk Level:")
+                # Display risk level based on model prediction (assumed 0, 1, 2 mapping to Low, Medium, High)
+                if predicted_risk[0] == 0:
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: green;">Low Risk</p>', unsafe_allow_html=True)
+                elif predicted_risk[0] == 1:
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: orange;">Medium Risk</p>', unsafe_allow_html=True)
                 else:
-                    pred_label, color = "High Risk", "red"
-            else:
-                # fallback на argmax, если нет вероятностей
-                pred = maternal_model.predict(X)[0]
-                pred_label, color = {
-                    0: ("Low Risk", "green"),
-                    1: ("Medium Risk", "orange"),
-                    2: ("High Risk", "red")
-                }[pred]
-
-            # Вывод результата
-            st.markdown(
-                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{pred_label}</p>",
-                unsafe_allow_html=True
-            )
+                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: red;">High Risk</p>', unsafe_allow_html=True)
+            except ValueError:
+                st.error("Please enter valid numeric values for all parameters.")
+            except Exception as e:
+                st.error(f"An error occurred during prediction: {e}")
 
     with col_clear:
-        if st.button("Clear"):
-            st.experimental_rerun()
-
-
+        if st.button("Clear"): 
+            st.rerun()
