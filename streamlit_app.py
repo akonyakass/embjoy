@@ -187,57 +187,31 @@ elif selected_option == 'Pregnancy Risk Prediction':
     # --- Predict & Clear Buttons ---
     col_button, col_clear = st.columns(2)
     with col_button:
-        if st.button('Predict Pregnancy Risk'):
-            # Prepare features
-            X = [[age, diastolic, glucose, temp, heart_rate]]
-            if use_scaler:
-                X = scaler.transform(X)
+    if st.button('Predict Pregnancy Risk'):
+        X = [[age, diastolic, glucose, temp, heart_rate]]
+        if use_scaler:
+            X = scaler.transform(X)
 
-            st.write("**Features for model:**", X)
+        st.write("**Features for model:**", X)
 
-            # Debug: print raw probabilities
-            try:
-                probs = maternal_model.predict_proba(X)[0]
-                low, med, high = probs
-                st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
-            except AttributeError:
-                st.info("Модель не поддерживает predict_proba().")
-                low = med = high = None
+        # Вот эти строки – в Streamlit:
+        try:
+            probs = maternal_model.predict_proba(X)[0]
+            low, med, high = probs
+            st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
+        except AttributeError:
+            st.info("Модель не поддерживает predict_proba().")
 
-            # Threshold-based decision (check high/med first)
-            if low is not None:
-                if high >= 0.30:
-                    label, color = "High Risk", "red"
-                elif med >= 0.30:
-                    label, color = "Medium Risk", "orange"
-                elif low >= 0.30:
-                    label, color = "Low Risk", "green"
-                else:
-                    idx = probs.argmax()
-                    label, color = {
-                        0: ("Low Risk",    "green"),
-                        1: ("Medium Risk", "orange"),
-                        2: ("High Risk",   "red")
-                    }[idx]
-            else:
-                pred = maternal_model.predict(X)[0]
-                label, color = {
-                    0: ("Low Risk",    "green"),
-                    1: ("Medium Risk", "orange"),
-                    2: ("High Risk",   "red")
-                }[pred]
+        # и потом argmax-логика:
+        pred = maternal_model.predict(X)[0]
+        label, color = {
+            0: ("Low Risk",    "green"),
+            1: ("Medium Risk", "orange"),
+            2: ("High Risk",   "red")
+        }[pred]
 
-            st.markdown(
-                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
-                unsafe_allow_html=True
-            )
-
-    with col_clear:
-        if st.button("Clear"):
-            st.rerun()  # use st.rerun() for clearing inputs
-
-
-
-
-
+        st.markdown(
+            f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
+            unsafe_allow_html=True
+        )
 
