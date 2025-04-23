@@ -183,57 +183,42 @@ elif selected_option == 'Pregnancy Risk Prediction':
         heart_rate = st.number_input('Heart Rate (BPM)',       40.0,200.0,  72.0, step=1.0)
 
     # --- Predict & Clear buttons ---
-    col_button, col_clear = st.columns(2)
-    with col_button:
-        if st.button('Predict Pregnancy Risk'):
-            # 1) Convert Celsius to Fahrenheit
-            temp_f = temp_c * 9.0/5.0 + 32.0
+    # --- Predict & Clear buttons ---
+col_button, col_clear = st.columns(2)
 
-            # 2) Build feature array and scale
-            X = [[age, diastolic, glucose, temp_f, heart_rate]]
-            if use_scaler:
-                X = scaler.transform(X)
+with col_button:
+    if st.button('Predict Pregnancy Risk'):
+        # 1) Перевод °C → °F (как на обучении)
+        temp_f = temp_c * 9.0/5.0 + 32.0
 
-            st.write("**Features for model (post-scaling):**", X)
+        # 2) Формируем признаки и масштабируем
+        X = [[age, diastolic, glucose, temp_f, heart_rate]]
+        if use_scaler:
+            X = scaler.transform(X)
 
-            # 3) Get class probabilities
-            try:
-                probs = maternal_model.predict_proba(X)[0]
-                low, med, high = probs
-                st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
-            except AttributeError:
-                st.info("Модель не поддерживает predict_proba().")
-                low = med = high = None
+        st.write("**Features for model (post-scaling):**", X)
 
-            # 4) Threshold logic: check High → Medium → Low
-            if low is not None:
-                if high >= 0.30:
-                    label, color = "High Risk",   "red"
-                elif med  >= 0.30:
-                    label, color = "Medium Risk", "orange"
-                elif low  >= 0.30:
-                    label, color = "Low Risk",    "green"
-                else:
-                    idx = probs.argmax()
-                    label, color = {
-                        0: ("Low Risk",    "green"),
-                        1: ("Medium Risk", "orange"),
-                        2: ("High Risk",   "red")
-                    }[idx]
-            else:
-                pred = maternal_model.predict(X)[0]
-                label, color = {
-                    0: ("Low Risk",    "green"),
-                    1: ("Medium Risk", "orange"),
-                    2: ("High Risk",   "red")
-                }[pred]
+        # 3) Получаем вероятности (для информации)
+        try:
+            probs = maternal_model.predict_proba(X)[0]
+            st.write(f"🔍 Probs: Low={probs[0]:.2f}, Med={probs[1]:.2f}, High={probs[2]:.2f}")
+        except AttributeError:
+            st.info("Модель не поддерживает predict_proba().")
 
-            # 5) Display result
-            st.markdown(
-                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
-                unsafe_allow_html=True
-            )
+        # 4) Доверяем модели — берём её предсказание
+        pred_class = maternal_model.predict(X)[0]
+        label, color = {
+            0: ("Low Risk",    "green"),
+            1: ("Medium Risk", "orange"),
+            2: ("High Risk",   "red")
+        }[pred_class]
 
-    with col_clear:
-        if st.button("Clear"):
-            st.rerun()
+        # 5) Выводим результат
+        st.markdown(
+            f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
+            unsafe_allow_html=True
+        )
+
+with col_clear:
+    if st.button("Clear"):
+        st.rerun()
