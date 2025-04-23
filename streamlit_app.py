@@ -147,62 +147,70 @@ elif selected_option == 'Pregnancy Risk Prediction':
     st.title("Pregnancy Risk Prediction")
 
     st.markdown("""
-    Predicting the risk during pregnancy involves analyzing key parameters such as age, blood glucose levels, diastolic blood pressure, body temperature, and heart rate.
-    Using a trained machine learning model, this tool provides a preliminary risk assessment to help guide early interventions and improve maternal outcomes.
+    Предсказание риска на основе пяти параметров:
+    возраст, диастолическое давление, уровень глюкозы,
+    температура тела и частота пульса.
     """)
 
-    # Load the trained model from Models/finalized_maternal_model.sav
-    model_path = os.path.join("Models", "finalized_maternal_model.sav")
+    # --- Load model and scaler ---
+    model_path  = os.path.join("Models", "finalized_maternal_model.sav")
+    scaler_path = os.path.join("Models", "scaler.sav")  # если есть
     try:
         maternal_model = pickle.load(open(model_path, 'rb'))
     except Exception as e:
-        st.error(f"Error loading prediction model: {e}")
+        st.error(f"Не удалось загрузить модель: {e}")
+        st.stop()
 
-    # --- User Input Section ---
-    # Arrange the inputs in columns
+    use_scaler = False
+    if os.path.exists(scaler_path):
+        try:
+            scaler = pickle.load(open(scaler_path, 'rb'))
+            use_scaler = True
+        except:
+            st.warning("Скалер не загрузился, будем предсказывать без него.")
+
+    # --- User inputs ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age_input = st.text_input('Age of the Person', key="age")
+        age        = st.number_input('Age (years)', min_value=10.0, max_value=60.0, value=28.0, step=0.1)
     with col2:
-        diastolicBP_input = st.text_input('Diastolic BP (mmHg)', key="diastolicBP")
+        diastolic  = st.number_input('Diastolic BP (mmHg)', min_value=40.0, max_value=180.0, value=80.0, step=0.1)
     with col3:
-        BS_input = st.text_input('Blood Glucose (mmol/L)', key="BS")
+        glucose    = st.number_input('Blood Glucose (mmol/L)', min_value=3.0, max_value=15.0, value=5.2, step=0.1)
     with col1:
-        bodyTemp_input = st.text_input('Body Temperature (Celsius)', key="bodyTemp")
+        temp       = st.number_input('Body Temperature (°C)', min_value=35.0, max_value=40.0, value=36.6, step=0.1)
     with col2:
-        heartRate_input = st.text_input('Heart Rate (BPM)', key="heartRate")
+        heart_rate = st.number_input('Heart Rate (BPM)', min_value=40.0, max_value=200.0, value=72.0, step=1.0)
 
-    predicted_risk = None
+    # --- Predict button ---
+    if st.button('Predict Pregnancy Risk'):
+        # Собираем фичи
+        X = [[age, diastolic, glucose, temp, heart_rate]]
+        # Применяем скейлинг, если есть
+        if use_scaler:
+            X = scaler.transform(X)
 
-    # --- Prediction and Clear Buttons ---
-    col_button, col_clear = st.columns(2)
-    with col_button:
-        if st.button('Predict Pregnancy Risk'):
-            try:
-                # Convert input values to float; adjust conversions as needed.
-                age = float(age_input)
-                diastolicBP = float(diastolicBP_input)
-                BS = float(BS_input)
-                bodyTemp = float(bodyTemp_input)
-                heartRate = float(heartRate_input)
-                
-                # Predict risk using the model (model expects a 2D list)
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    predicted_risk = maternal_model.predict([[age, diastolicBP, BS, bodyTemp, heartRate]])
-                
-                st.subheader("Risk Level:")
-                # Display risk level based on model prediction (assumed 0, 1, 2 mapping to Low, Medium, High)
-                if predicted_risk[0] == 0:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: green;">Low Risk</p>', unsafe_allow_html=True)
-                elif predicted_risk[0] == 1:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: orange;">Medium Risk</p>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<p style="font-weight: bold; font-size: 20px; color: red;">High Risk</p>', unsafe_allow_html=True)
-            except ValueError:
-                st.error("Please enter valid numeric values for all parameters.")
-            except Exception as e:
-                st.error(f"An error occurred during prediction: {e}")
+        # Отображаем, что видит модель
+        st.write("**Features for model:**", X)
+
+        # Получаем вероятности
+        try:
+            probs = maternal_model.predict_proba(X)[0]
+            st.write(f"Class probabilities — Low: {probs[0]:.2f}, Medium: {probs[1]:.2f}, High: {probs[2]:.2f}")
+        except AttributeError:
+            st.write("Модель не поддерживает predict_proba().")
+
+        # Само предсказание
+        pred = maternal_model.predict(X)[0]
+        label = {0: ("Low Risk", "green"),
+                 1: ("Medium Risk", "orange"),
+                 2: ("High Risk", "red")}[pred]
+
+        st.markdown(
+            f"<p style='font-weight:bold; font-size:24px; color:{label[1]};'>{label[0]}</p>",
+            unsafe_allow_html=True
+        )
+
 
     with col_clear:
         if st.button("Clear"): 
