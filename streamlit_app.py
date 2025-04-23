@@ -174,13 +174,13 @@ elif selected_option == 'Pregnancy Risk Prediction':
     with col1:
         age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0, 180.0, 80.0, step=0.1)
+        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0,180.0,  80.0, step=0.1)
     with col3:
-        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0,  15.0,  5.2, step=0.1)
+        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,   5.2, step=0.1)
     with col1:
-        temp_c     = st.number_input('Body Temperature (°C)', 35.0,  40.0, 36.6, step=0.1)
+        temp_c     = st.number_input('Body Temperature (°C)', 35.0, 40.0,  36.6, step=0.1)
     with col2:
-        heart_rate = st.number_input('Heart Rate (BPM)',       40.0, 200.0, 72.0, step=1.0)
+        heart_rate = st.number_input('Heart Rate (BPM)',       40.0,200.0,  72.0, step=1.0)
 
     # --- Predict & Clear buttons ---
     col_button, col_clear = st.columns(2)
@@ -196,22 +196,39 @@ elif selected_option == 'Pregnancy Risk Prediction':
 
             st.write("**Features for model (post-scaling):**", X)
 
-            # 3) Show class probabilities
+            # 3) Get class probabilities
             try:
                 probs = maternal_model.predict_proba(X)[0]
                 low, med, high = probs
                 st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
             except AttributeError:
                 st.info("Модель не поддерживает predict_proba().")
+                low = med = high = None
 
-            # 4) Final prediction via argmax
-            pred = maternal_model.predict(X)[0]
-            label, color = {
-                0: ("Low Risk",    "green"),
-                1: ("Medium Risk", "orange"),
-                2: ("High Risk",   "red")
-            }[pred]
+            # 4) Threshold logic: check High → Medium → Low
+            if low is not None:
+                if high >= 0.30:
+                    label, color = "High Risk",   "red"
+                elif med  >= 0.30:
+                    label, color = "Medium Risk", "orange"
+                elif low  >= 0.30:
+                    label, color = "Low Risk",    "green"
+                else:
+                    idx = probs.argmax()
+                    label, color = {
+                        0: ("Low Risk",    "green"),
+                        1: ("Medium Risk", "orange"),
+                        2: ("High Risk",   "red")
+                    }[idx]
+            else:
+                pred = maternal_model.predict(X)[0]
+                label, color = {
+                    0: ("Low Risk",    "green"),
+                    1: ("Medium Risk", "orange"),
+                    2: ("High Risk",   "red")
+                }[pred]
 
+            # 5) Display result
             st.markdown(
                 f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
                 unsafe_allow_html=True
@@ -220,4 +237,3 @@ elif selected_option == 'Pregnancy Risk Prediction':
     with col_clear:
         if st.button("Clear"):
             st.rerun()
-
