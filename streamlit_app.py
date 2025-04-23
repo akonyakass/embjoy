@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import warnings
 import pickle
+from joblib import load 
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Maternal Mortality: Analysis & Prediction", layout="wide")
