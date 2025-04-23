@@ -158,15 +158,16 @@ elif selected_option == 'Pregnancy Risk Prediction':
 
     model_path  = os.path.join("Models", "finalized_maternal_model.joblib")
     scaler_path = os.path.join("Models", "scaler.sav")
+    
     if st.checkbox("⚠️ Debug: test fixed points"):
-    test_points = [
-        [25, 75, 5.0, 98.6, 70],    # должно быть Low
-        [35, 90, 7.0, 99.5, 85],    # должно быть Medium
-        [45,110,12.0,100.4,110]     # должно быть High
-    ]
-    st.write("Preds:", model.predict(test_points))
-    try:
-        st.write("Probs:", model.predict_proba(test_points).round(2))
-    except:
-        pass
+        test_points = [
+            [25, 75, 5.0, 98.6, 70],    # должно быть Low
+            [35, 90, 7.0, 99.5, 85],    # должно быть Medium
+            [45,110,12.0,100.4,110]     # должно быть High
+        ]
+        st.write("Preds:", model.predict(test_points))
+        try:
+            st.write("Probs:", model.predict_proba(test_points).round(2))
+        except:
+            pass
 
