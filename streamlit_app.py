@@ -156,12 +156,12 @@ with open("Models/scaler.sav","rb") as f:
 age        = st.number_input('Age (years)', 10.0, 60.0, 28.0, step=0.1)
 diastolic  = st.number_input('Diastolic BP (mmHg)', 40.0,180.0,80.0, step=0.1)
 glucose    = st.number_input('Blood Glucose (mmol/L)', 3.0,15.0,5.2, step=0.1)
-temp_c     = st.number_input('Body Temperature (°C)', 35.0,40.0,36.6, step=0.1)
+temp_f=    = st.number_input('Body Temperature (°C)', 35.0,100,36.6, step=0.1)
 heart_rate = st.number_input('Heart Rate (BPM)', 40.0,200.0,72.0, step=1.0)
 
 if st.button("Predict Pregnancy Risk"):
     # 1) C→F
-    temp_f = temp_c * 9/5 + 32
+
     # 2) DataFrame с теми же колонками
     df_X = pd.DataFrame([[age, diastolic, glucose, temp_f, heart_rate]],
                         columns=['Age','DiastolicBP','BS','BodyTemp','HeartRate'])
