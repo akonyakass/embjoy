@@ -148,13 +148,12 @@ elif selected_option == 'Pregnancy Risk Prediction':
 
     st.markdown("""
     Predicting risk based on five parameters:
-    age, diastolic blood pressure, blood glucose, body temperature, and heart rate.
+    age, diastolic blood pressure, blood glucose, body temperature (°C), and heart rate.
     """)
 
     # --- Load model and scaler ---
     model_path  = os.path.join("Models", "finalized_maternal_model.joblib")
     scaler_path = os.path.join("Models", "scaler.sav")
-
     try:
         maternal_model = load(model_path)
     except Exception as e:
@@ -170,50 +169,42 @@ elif selected_option == 'Pregnancy Risk Prediction':
         except Exception as e:
             st.warning(f"Скалер не загрузился: {e}\nБудем предсказывать без него.")
 
-    # --- User Inputs ---
+    # --- User inputs ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age = st.number_input(
-            'Age (years)', min_value=10.0, max_value=60.0, value=28.0, step=0.1
-        )
+        age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolic = st.number_input(
-            'Diastolic BP (mmHg)', min_value=40.0, max_value=180.0, value=80.0, step=0.1
-        )
+        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0, 180.0, 80.0, step=0.1)
     with col3:
-        glucose = st.number_input(
-            'Blood Glucose (mmol/L)', min_value=3.0, max_value=15.0, value=5.2, step=0.1
-        )
+        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0,  15.0,  5.2, step=0.1)
     with col1:
-        temp = st.number_input(
-            'Body Temperature (°C)', min_value=35.0, max_value=40.0, value=36.6, step=0.1
-        )
+        temp_c     = st.number_input('Body Temperature (°C)', 35.0,  40.0, 36.6, step=0.1)
     with col2:
-        heart_rate = st.number_input(
-            'Heart Rate (BPM)', min_value=40.0, max_value=200.0, value=72.0, step=1.0
-        )
+        heart_rate = st.number_input('Heart Rate (BPM)',       40.0, 200.0, 72.0, step=1.0)
 
-    # --- Predict & Clear Buttons ---
+    # --- Predict & Clear buttons ---
     col_button, col_clear = st.columns(2)
     with col_button:
         if st.button('Predict Pregnancy Risk'):
-            # Prepare features
-            X = [[age, diastolic, glucose, temp, heart_rate]]
+            # 1) Convert Celsius to Fahrenheit
+            temp_f = temp_c * 9.0/5.0 + 32.0
+
+            # 2) Build feature array and scale
+            X = [[age, diastolic, glucose, temp_f, heart_rate]]
             if use_scaler:
                 X = scaler.transform(X)
 
-            st.write("**Features for model:**", X)
+            st.write("**Features for model (post-scaling):**", X)
 
-            # Debug: print raw probabilities
+            # 3) Show class probabilities
             try:
                 probs = maternal_model.predict_proba(X)[0]
                 low, med, high = probs
                 st.write(f"DEBUG – Probs: Low={low:.2f}, Med={med:.2f}, High={high:.2f}")
             except AttributeError:
                 st.info("Модель не поддерживает predict_proba().")
-                low = med = high = None
 
-            # Simple argmax decision
+            # 4) Final prediction via argmax
             pred = maternal_model.predict(X)[0]
             label, color = {
                 0: ("Low Risk",    "green"),
@@ -229,3 +220,4 @@ elif selected_option == 'Pregnancy Risk Prediction':
     with col_clear:
         if st.button("Clear"):
             st.rerun()
+
