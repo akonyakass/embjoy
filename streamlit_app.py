@@ -171,15 +171,15 @@ elif selected_option == 'Pregnancy Risk Prediction':
     # --- Ввод данных пользователем ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age        = st.number_input('Age (years)',           min_value=10.0,  max_value=60.0,  value=28.0, step=0.1)
+        age        = st.number_input('Age (years)',           10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolic  = st.number_input('Diastolic BP (mmHg)',   min_value=40.0,  max_value=180.0, value=80.0, step=0.1)
+        diastolic  = st.number_input('Diastolic BP (mmHg)',   40.0, 180.0, 80.0, step=0.1)
     with col3:
-        glucose    = st.number_input('Blood Glucose (mmol/L)',min_value=3.0,   max_value=15.0,  value=5.2,  step=0.1)
+        glucose    = st.number_input('Blood Glucose (mmol/L)', 3.0,  15.0,  5.2, step=0.1)
     with col1:
-        temp       = st.number_input('Body Temperature (°C)', min_value=35.0,  max_value=40.0,  value=36.6, step=0.1)
+        temp       = st.number_input('Body Temperature (°C)', 35.0,  40.0, 36.6, step=0.1)
     with col2:
-        heart_rate = st.number_input('Heart Rate (BPM)',      min_value=40.0,  max_value=200.0, value=72.0, step=1.0)
+        heart_rate = st.number_input('Heart Rate (BPM)',      40.0, 200.0,  72.0, step=1.0)
 
     # --- Кнопки Predict и Clear ---
     col_button, col_clear = st.columns(2)
@@ -191,30 +191,46 @@ elif selected_option == 'Pregnancy Risk Prediction':
             if use_scaler:
                 X = scaler.transform(X)
 
-            # Показываем фичи, которые видит модель
+            # Показываем фичи для отладки
             st.write("**Features for model:**", X)
 
-            # Выводим вероятности по классам (если есть predict_proba)
+            # Получаем вероятности (если поддерживается)
             try:
                 probs = maternal_model.predict_proba(X)[0]
-                st.write(f"Class probabilities — Low: {probs[0]:.2f}, Medium: {probs[1]:.2f}, High: {probs[2]:.2f}")
+                low, med, high = probs
+                st.write(f"Class probabilities — Low: {low:.2f}, Medium: {med:.2f}, High: {high:.2f}")
             except AttributeError:
-                st.info("Модель не поддерживает predict_proba().")
+                # Если модель не имеет predict_proba
+                st.info("Модель не поддерживает predict_proba(). Автоматически используем argmax.")
 
-            # Само предсказание
-            pred = maternal_model.predict(X)[0]
-            label, color = {
-                0: ("Low Risk", "green"),
-                1: ("Medium Risk", "orange"),
-                2: ("High Risk", "red")
-            }[pred]
+                # Получаем вероятности заглушкой одинаковых весов
+                low = med = high = None
 
+            # Пороговое правило вместо простого argmax
+            if low is not None:
+                if low >= 0.50:
+                    pred_label, color = "Low Risk", "green"
+                elif med >= 0.30:
+                    pred_label, color = "Medium Risk", "orange"
+                else:
+                    pred_label, color = "High Risk", "red"
+            else:
+                # fallback на argmax, если нет вероятностей
+                pred = maternal_model.predict(X)[0]
+                pred_label, color = {
+                    0: ("Low Risk", "green"),
+                    1: ("Medium Risk", "orange"),
+                    2: ("High Risk", "red")
+                }[pred]
+
+            # Вывод результата
             st.markdown(
-                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{label}</p>",
+                f"<p style='font-size:24px; color:{color}; font-weight:bold;'>{pred_label}</p>",
                 unsafe_allow_html=True
             )
 
     with col_clear:
         if st.button("Clear"):
             st.experimental_rerun()
+
 
