@@ -143,7 +143,7 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 # =============================================
 # Pregnancy Risk Prediction Section
 # =============================================
-elif selected_option == 'Pregnancy Risk Prediction':
+if selected_option == 'Pregnancy Risk Prediction':
     st.title("Pregnancy Risk Prediction")
 
     st.markdown("""
@@ -187,14 +187,12 @@ elif selected_option == 'Pregnancy Risk Prediction':
     col_button, col_clear = st.columns(2)
     with col_button:
         if st.button('Predict Pregnancy Risk'):
-            # Prepare features
             X = [[age, diastolic, glucose, temp, heart_rate]]
             if use_scaler:
                 X = scaler.transform(X)
 
             st.write("**Features for model:**", X)
 
-            # Show class probabilities if available
             try:
                 probs = maternal_model.predict_proba(X)[0]
                 low, med, high = probs
@@ -203,7 +201,6 @@ elif selected_option == 'Pregnancy Risk Prediction':
                 st.info("Модель не поддерживает predict_proba().")
                 low = med = high = None
 
-            # Threshold-based decision
             if low is not None:
                 if low >= 0.50:
                     pred_label, color = "Low Risk", "green"
