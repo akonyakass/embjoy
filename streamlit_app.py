@@ -143,56 +143,70 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 
 # =============================================
 # Pregnancy Risk Prediction Section
-import os
-import streamlit as st
-from joblib import load
-
-# … твоя конфигурация страницы и sidebar …
-
-elif selected_option == 'Pregnancy Risk Prediction':
+else:  # selected_option == 'Pregnancy Risk Prediction'
     st.title("Pregnancy Risk Prediction")
+
     st.markdown("""
     Predicting risk based on five parameters:
     age, diastolic blood pressure, blood glucose, body temperature (°F), and heart rate.
     """)
 
-    # 1) Загрузка единого pipeline
+    # --- Load full pipeline ---
+    pipeline_path = os.path.join("Models", "full_maternal_pipeline.joblib")
     try:
-        pipeline = load("Models/full_maternal_pipeline.joblib")
+        pipeline = load(pipeline_path)
     except Exception as e:
         st.error(f"Не удалось загрузить pipeline: {e}")
         st.stop()
 
-    # 2) Ввод от пользователя (темп в °F!)
+    # --- User inputs ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age       = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
+        age       = st.number_input('Age (years)',         min_value=10.0, max_value=60.0, value=28.0, step=0.1)
     with col2:
-        diastolic = st.number_input('Diastolic BP (mmHg)',    40.0,180.0, 80.0, step=0.1)
+        diastolic = st.number_input('Diastolic BP (mmHg)', min_value=40.0, max_value=180.0, value=80.0, step=0.1)
     with col3:
-        glucose   = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,  5.2, step=0.1)
+        glucose   = st.number_input('Blood Glucose (mmol/L)', min_value=3.0, max_value=15.0, value=5.2, step=0.1)
     with col1:
-        temp_f    = st.number_input('Body Temperature (°F)',  95.0,110.0, 98.6, step=0.1)
+        temp_f    = st.number_input('Body Temperature (°F)', min_value=95.0, max_value=110.0, value=98.6, step=0.1)
     with col2:
-        heart    = st.number_input('Heart Rate (BPM)',         40.0,200.0, 72.0, step=1.0)
+        heart     = st.number_input('Heart Rate (BPM)',     min_value=40.0, max_value=200.0, value=72.0, step=1.0)
 
-    # 3) Predict & debug
+    # --- Predict & Debug ---
+    if st.checkbox("⚠️ Debug: test fixed points"):
+        test_pts = [
+            [25, 75, 5.0, 98.6, 70],
+            [35, 90, 7.0, 99.5, 85],
+            [45,110,12.0,100.4,110]
+        ]
+        st.write("Preds:", pipeline.predict(test_pts))
+        try:
+            st.write("Probs:", pipeline.predict_proba(test_pts).round(2))
+        except:
+            pass
+        st.stop()
+
+    # --- Prediction button ---
     if st.button("Predict Pregnancy Risk"):
         features = [[age, diastolic, glucose, temp_f, heart]]
-        # получаем и class, и вероятности
-        pred   = pipeline.predict(features)[0]
+        # 1) Predict probabilities if available
         try:
             probs = pipeline.predict_proba(features)[0]
-        except AttributeError:
+            st.write(f"🔍 Probs Low/Med/High: {probs.round(2)}")
+        except:
             probs = None
 
-        # 4) Вывод
-        if probs is not None:
-            st.write("🔍 Probs Low/Med/High:", [round(p,2) for p in probs])
+        # 2) Predict class
+        pred = pipeline.predict(features)[0]
         label, color = {
             0: ("Low Risk",    "green"),
             1: ("Medium Risk", "orange"),
             2: ("High Risk",   "red")
         }[pred]
+
+        # 3) Display
         st.markdown(f"<h2 style='color:{color}'>{label}</h2>", unsafe_allow_html=True)
 
+    # --- Clear button ---
+    if st.button("Clear"):
+        st.experimental_rerun()
