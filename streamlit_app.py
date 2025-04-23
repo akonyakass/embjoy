@@ -143,41 +143,39 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 
 # =============================================
 # Pregnancy Risk Prediction Section
-if (selected == 'Pregnancy Risk Prediction'):
+elif selected_option == 'Pregnancy Risk Prediction':
     st.title('Pregnancy Risk Prediction')
     st.markdown("""
         Predicting the risk in pregnancy involves analyzing several parameters,
         including age, blood sugar levels, blood pressure, temperature, and heart rate.
     """, unsafe_allow_html=True)
 
-    # Загружаем модель
+    # Load the model
     maternal_model = pickle.load(open("model/finalized_maternal_model.sav",'rb'))
 
-    # Ввод от пользователя — сразу число, а не текст
+    # User inputs as numbers
     col1, col2, col3 = st.columns(3)
     with col1:
-        age        = st.number_input('Age (years)',            min_value=10.0, max_value=60.0, value=28.0, step=0.1)
+        age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolicBP= st.number_input('Diastolic BP (mmHg)',    min_value=40.0, max_value=180.0, value=80.0, step=0.1)
+        diastolicBP= st.number_input('Diastolic BP (mmHg)',    40.0, 180.0, 80.0, step=0.1)
     with col3:
-        BS         = st.number_input('Blood Glucose (mmol/L)', min_value=3.0,  max_value=15.0, value=5.2,  step=0.1)
+        BS         = st.number_input('Blood Glucose (mmol/L)', 3.0,  15.0,  5.2, step=0.1)
     with col1:
-        bodyTemp   = st.number_input('Body Temperature (°C)',  min_value=35.0, max_value=140.0, value=36.6, step=0.1)
+        bodyTemp   = st.number_input('Body Temperature (°C)',  35.0, 140.0, 36.6, step=0.1)
     with col2:
-        heartRate  = st.number_input('Heart Rate (BPM)',       min_value=40.0, max_value=200.0, value=72.0, step=1.0)
+        heartRate  = st.number_input('Heart Rate (BPM)',       40.0, 200.0, 72.0, step=1.0)
 
-    # Кнопка и предсказание
+    # Predict button
     if st.button('Predict Pregnancy Risk'):
-        # Собираем в правильном порядке в 2D-массив
         features = [[age, diastolicBP, BS, bodyTemp, heartRate]]
-        # Предсказываем
         try:
             pred = maternal_model.predict(features)[0]
         except Exception as e:
             st.error(f"Ошибка при predict: {e}")
             st.stop()
 
-        # Выводим
+        # Display
         if pred == 0:
             st.markdown('<h2 style="color:green">Low Risk</h2>', unsafe_allow_html=True)
         elif pred == 1:
@@ -185,6 +183,7 @@ if (selected == 'Pregnancy Risk Prediction'):
         else:
             st.markdown('<h2 style="color:red">High Risk</h2>', unsafe_allow_html=True)
 
+    # Clear button
     if st.button("Clear"):
         st.experimental_rerun()
-
+ 
