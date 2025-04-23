@@ -182,18 +182,24 @@ elif selected_option == 'Pregnancy Risk Prediction':
             pass
         st.stop()  # stop here during debug
 
-    # --- User inputs ---
+        # --- User inputs ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age        = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
+        age       = st.number_input('Age (years)',            10.0, 60.0, 28.0, step=0.1)
     with col2:
-        diastolic  = st.number_input('Diastolic BP (mmHg)',    40.0,180.0, 80.0, step=0.1)
+        diastolic = st.number_input('Diastolic BP (mmHg)',    40.0,180.0, 80.0, step=0.1)
     with col3:
-        glucose    = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,  5.2, step=0.1)
+        glucose   = st.number_input('Blood Glucose (mmol/L)',  3.0, 15.0,  5.2, step=0.1)
+    
     with col1:
-        temp_f     = st.number_input('Body Temperature (°F)',  95.0,110.0, 98.6, step=0.1)
+        temp_f    = st.number_input(
+            'Body Temperature (°F)', 
+            min_value=95.0, max_value=110.0, 
+            value=98.6,    # <- вот дефолт 98.6°F, а не 36.6
+            step=0.1
+        )
     with col2:
-        heart_rate = st.number_input('Heart Rate (BPM)',       40.0,200.0, 72.0, step=1.0)
+        heart_rate= st.number_input('Heart Rate (BPM)',       40.0,200.0, 72.0, step=1.0)
 
     # --- Predict & Clear buttons ---
     col_button, col_clear = st.columns(2)
