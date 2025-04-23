@@ -144,7 +144,7 @@ This chart focuses on UNDP-classified developing regions, illustrating where mat
 # =============================================
 # Pregnancy Risk Prediction Section
 # =============================================
-# Pregnancy Risk Prediction Section
+
 elif selected_option == 'Pregnancy Risk Prediction':
     st.title('Pregnancy Risk Prediction')
     st.markdown("""
